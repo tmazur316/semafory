@@ -136,15 +136,81 @@ void perform_test1()
   while(1)
   {
     pthread_t new_thread;
-    int number=rand()%6;
+    int number=rand()%5;
     usleep(20000);
 
-    if(number==0) pthread_create(&new_thread, NULL, (void *) producer, NULL);
-    else if (number == 1) pthread_create(&new_thread, NULL, (void *) consumer1, NULL);
-    else if (number == 2) pthread_create(&new_thread, NULL, (void *) consumer2, NULL);
-    else if (number == 3) pthread_create(&new_thread, NULL, (void *) consumer3, NULL);
-    else if (number == 4) pthread_create(&new_thread, NULL, (void *) consumer4, NULL);
-    else if (number == 5) pthread_create(&new_thread, NULL, (void *) consumer5, NULL);
+    pthread_create(&new_thread, NULL, (void *) producer, NULL);
+
+    if (number == 0) pthread_create(&new_thread, NULL, (void *) consumer1, NULL);
+    else if (number == 1) pthread_create(&new_thread, NULL, (void *) consumer2, NULL);
+    else if (number == 2) pthread_create(&new_thread, NULL, (void *) consumer3, NULL);
+    else if (number == 3) pthread_create(&new_thread, NULL, (void *) consumer4, NULL);
+    else if (number == 4) pthread_create(&new_thread, NULL, (void *) consumer5, NULL);
+    else break;
+  }
+}
+
+void perform_test2()
+{
+  while(1)
+  {
+    int i;
+    pthread_t new_thread;
+    int number=rand()%5;
+    usleep(20000);
+
+    for(i = 0; i < 2; i++)
+      pthread_create(&new_thread, NULL, (void *) producer, NULL);
+
+    if (number == 0) pthread_create(&new_thread, NULL, (void *) consumer1, NULL);
+    else if (number == 1) pthread_create(&new_thread, NULL, (void *) consumer2, NULL);
+    else if (number == 2) pthread_create(&new_thread, NULL, (void *) consumer3, NULL);
+    else if (number == 3) pthread_create(&new_thread, NULL, (void *) consumer4, NULL);
+    else if (number == 4) pthread_create(&new_thread, NULL, (void *) consumer5, NULL);
+    else break;
+  }
+}
+
+void perform_test3()
+{
+  while(1)
+  {
+    pthread_t new_thread;
+    int number = rand() % 5;
+    usleep(20000);
+
+    pthread_create(&new_thread, NULL, (void *) producer, NULL);
+
+    if (number == 0)
+    {
+      int i=0;
+      for(i = 0; i < 2; i++)
+        pthread_create(&new_thread, NULL, (void *) consumer1, NULL);
+    }
+    else if (number == 1)
+    {
+      int i=0;
+      for(i = 0; i < 2; i++)
+        pthread_create(&new_thread, NULL, (void *) consumer2, NULL);
+    }
+    else if (number == 2)
+    {
+      int i=0;
+      for(i = 0; i < 2; i++)
+        pthread_create(&new_thread, NULL, (void *) consumer3, NULL);
+    }
+    else if (number == 3)
+    {
+      int i=0;
+      for(i = 0; i < 2; i++)
+        pthread_create(&new_thread, NULL, (void *) consumer4, NULL);
+    }
+    else if (number == 4)
+    {
+      int i=0;
+      for(i = 0; i < 2; i++)
+        pthread_create(&new_thread, NULL, (void *) consumer5, NULL);
+    }
     else break;
   }
 }
@@ -154,14 +220,15 @@ int main()
   unsigned seed;
   time_t t;
   int i, j;
+  char c;
 
-  for(i=0; i<5; i++)
+  for(i = 0; i < 5; i++)
     array_of_buffers[i]=(buffer *)malloc(sizeof(buffer));
 
   seed=time(&t);
   srand(seed);
 
-  for(j=0; j<5; j++)
+  for(j = 0; j < 5; j++)
   {
     sem_init(&array_of_buffers[j]->mutex, 0, 1);
     sem_init(&array_of_buffers[j]->empty, 0, 10);
@@ -170,9 +237,23 @@ int main()
 
   sem_init(&mutex2, 0, 1);
 
-  perform_test1();
+  printf("Wybierz test:\n1-test zwykly\n2-test z nadmiarowym producentem\n3-test z nadmiarowymi konsumentami\n");
+  c=getchar();
+  if(c=='1') perform_test1();
+  else if (c=='2') perform_test2();
+  else if(c=='3') perform_test3();
 
-  for(i=0; i<5; i++)
+  for(j = 0; j < 5; j++)
+  {
+    sem_destroy(&array_of_buffers[i]->mutex);
+    sem_destroy(&array_of_buffers[i]->empty);
+    sem_destroy(&array_of_buffers[i]->full);
+  }
+
+  sem_destroy(&mutex2);
+
+  for(i = 0; i < 5; i++)
     free(array_of_buffers[i]);
 
+  return 0;
 }
